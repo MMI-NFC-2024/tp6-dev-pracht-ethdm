@@ -1,28 +1,30 @@
 ---
 export const prerender = false;
 
-import penguins from "../../assets/penguins.json";
 import PlotFigure from "../../components/PlotFigure.astro";
 import * as Plot from "@observablehq/plot";
 
-
 export function getStaticPaths() {
-  const species = [...new Set(penguins.map((p) => p.species))];
-  
-  return species.map((s) => ({
-    params: { species: s },
-  }));
+  return [
+    { params: { species: "Adelie" } },
+    { params: { species: "Gentoo" } },
+    { params: { species: "Chinstrap" } },
+  ];
 }
-
 
 const { species } = Astro.params;
 
+
+const response = await fetch(`${Astro.url.origin}/api/penguins.json`);
+const penguins = await response.json();
 
 const filteredPenguins = penguins.filter((p) => p.species === species);
 
 if (filteredPenguins.length === 0) {
   return Astro.redirect('/404');
 }
+
+const timestamp = new Date().toLocaleString('fr-FR');
 
 const plotOptions = {
   grid: true,
@@ -81,6 +83,14 @@ const plotOptions = {
       margin-bottom: 20px;
       border-radius: 4px;
     }
+    .timestamp {
+      background: #d1ecf1;
+      border-left: 4px solid #0c5460;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
     .stats {
       background: white;
       padding: 15px;
@@ -100,7 +110,13 @@ const plotOptions = {
   <a href="/" class="back-link">← Retour à l'index</a>
   
   <div class="info-box">
-    <strong>Mode dynamique SSR :</strong> Cette page est générée à la demande côté serveur grâce à <code>prerender = false</code>
+    <strong>Mode dynamique SSR :</strong> Cette page fetch les données à chaque requête via l'API
+  </div>
+
+  <div class="timestamp">
+    <strong>Page générée le :</strong> {timestamp}
+    <br>
+    <small>(Rafraîchis la page pour voir le timestamp changer)</small>
   </div>
   
   <h1>Manchots de l'espèce {species}</h1>
