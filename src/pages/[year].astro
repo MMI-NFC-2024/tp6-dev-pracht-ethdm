@@ -1,0 +1,34 @@
+---
+import cars from "../assets/cars.json";
+export const prerender = false;
+import PlotFigure from "../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+const { year } = Astro.params;
+// Filtrer les voitures pour l'année spécifiée
+const filteredCars = cars.filter((car) => car.year.toString() === year);
+// Configuration du graphique
+const plotOptions = {
+  grid: true,
+  marks: [
+    Plot.dot(filteredCars, {
+      x: "weight (lb)",
+      y: "power (hp)",
+      fill: "steelblue",
+      r: 4,
+      fillOpacity: 0.7,
+    }),
+  ],
+  x: {
+    label: "Poids (lb)",
+  },
+  y: {
+    label: "Puissance (hp)",
+  },
+  title: `Relation Puissance vs Poids - Voitures ${year}`,
+};
+---
+
+<h1>Voitures de l'année {year}</h1>
+<p>{filteredCars.length} voiture(s) trouvée(s) pour l'année {year}</p>
+
+<PlotFigure options={plotOptions} />
